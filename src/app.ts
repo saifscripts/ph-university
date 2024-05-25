@@ -1,5 +1,9 @@
-import express, { Request, Response } from 'express';
 import cors from 'cors';
+import express from 'express';
+import globalErrorHandler from './app/middlewares/globalErrorHandler';
+import notFound from './app/middlewares/notFound';
+import test from './app/middlewares/test';
+import router from './app/routes';
 
 const app = express();
 
@@ -8,22 +12,15 @@ app.use(cors());
 app.use(express.json());
 
 // routes
-// app.use('/api/v1/users');
+app.use('/api/v1/', router);
 
 // test route
-app.get('/', (req: Request, res: Response) => {
-  res.status(200).json({
-    success: true,
-    message: 'App is running successfully!',
-  });
-});
+app.get('/', test);
+
+// globalError handler
+app.use(globalErrorHandler);
 
 // not found route
-app.all('/*', (req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    message: 'No route found!',
-  });
-});
+app.use(notFound);
 
 export default app;
