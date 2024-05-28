@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 export interface IUserName {
     firstName: string;
@@ -36,6 +36,6 @@ export interface IStudent {
     guardian: IGuardian;
     localGuardian: ILocalGuardian;
     profileImage: string;
-    admissionSemester: string;
+    admissionSemester: Types.ObjectId;
     isDeleted: boolean;
 }

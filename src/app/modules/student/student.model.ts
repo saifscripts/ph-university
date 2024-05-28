@@ -85,7 +85,7 @@ const localGuardianSchema = new Schema<ILocalGuardian>(
 
 const studentSchema = new Schema<IStudent>(
     {
-        id: { type: String, required: true },
+        id: { type: String, required: true, unique: true },
         user: {
             type: Schema.Types.ObjectId,
             required: true,
@@ -129,7 +129,7 @@ const studentSchema = new Schema<IStudent>(
             required: true,
         },
         admissionSemester: {
-            type: String,
+            type: Schema.Types.ObjectId,
             required: true,
         },
         isDeleted: {

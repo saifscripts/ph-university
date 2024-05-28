@@ -1,12 +1,22 @@
 import config from '../../config';
+import { Semester } from '../semester/semester.model';
 import { IStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
 import { IUser } from './user.interface';
 import { User } from './user.model';
+import { generateId } from './user.util';
 
-const createStudentIntoDB = async (password: string, studentData: IStudent) => {
+const createStudentIntoDB = async (password: string, payload: IStudent) => {
+    const admissionSemester = await Semester.findById(
+        payload.admissionSemester,
+    );
+
+    if (!admissionSemester) {
+        throw Error('Semester not found!');
+    }
+
     const userData: Partial<IUser> = {
-        id: '2030100001',
+        id: await generateId(admissionSemester),
         password: password || (config.default_password as string),
         role: 'student',
     };
@@ -18,7 +28,7 @@ const createStudentIntoDB = async (password: string, studentData: IStudent) => {
     }
 
     const newStudent = await Student.create({
-        ...studentData,
+        ...payload,
         id: newUser.id,
         user: newUser._id,
     });

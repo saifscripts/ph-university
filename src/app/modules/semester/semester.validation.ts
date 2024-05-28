@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { Months, SemesterCode, SemesterName } from './semester.constant';
 
-const createSemesterValidationSchema = z.object({
+const semesterValidationSchema = z.object({
     name: z.enum(SemesterName),
     code: z.enum(SemesterCode),
     year: z.string(),
@@ -10,5 +10,5 @@ const createSemesterValidationSchema = z.object({
 });
 
 export const SemesterValidations = {
-    createSemesterValidationSchema,
+    semesterValidationSchema,
 };

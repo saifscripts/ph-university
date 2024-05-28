@@ -8,8 +8,18 @@ const router = express.Router();
 router
     .route('/create-semester')
     .post(
-        validateRequest(SemesterValidations.createSemesterValidationSchema),
+        validateRequest(SemesterValidations.semesterValidationSchema),
         SemesterControllers.createSemester,
+    );
+
+router.route('/').get(SemesterControllers.getAllSemesters);
+
+router
+    .route('/:semesterId')
+    .get(SemesterControllers.getSingleSemester)
+    .patch(
+        validateRequest(SemesterValidations.semesterValidationSchema.partial()),
+        SemesterControllers.updateSemester,
     );
 
 export const SemesterRoutes = router;
