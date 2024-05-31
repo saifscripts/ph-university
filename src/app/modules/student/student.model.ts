@@ -128,8 +128,9 @@ const studentSchema = new Schema<IStudent>(
             type: String,
             required: true,
         },
-        admissionSemester: {
+        semester: {
             type: Schema.Types.ObjectId,
+            ref: 'Semester',
             required: true,
         },
         isDeleted: {
