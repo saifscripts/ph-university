@@ -7,12 +7,16 @@ const createAcademicDepartmentIntoDB = async (payload: IAcademicDepartment) => {
 };
 
 const getAllAcademicDepartmentsFromDB = async () => {
-    const academicDepartments = await AcademicDepartment.find();
+    const academicDepartments =
+        await AcademicDepartment.find().populate('academicFaculty');
     return academicDepartments;
 };
 
 const getSingleAcademicDepartmentFromDB = async (DepartmentId: string) => {
-    const academicDepartment = await AcademicDepartment.findById(DepartmentId);
+    const academicDepartment =
+        await AcademicDepartment.findById(DepartmentId).populate(
+            'academicFaculty',
+        );
 
     if (!academicDepartment) {
         throw Error('Academic Department does not exist!');

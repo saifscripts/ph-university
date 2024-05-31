@@ -2,7 +2,14 @@ import { IStudent } from './student.interface';
 import { Student } from './student.model';
 
 const getAllStudentsFromDB = async () => {
-    const students = await Student.find().populate('semester');
+    const students = await Student.find()
+        .populate('semester')
+        .populate({
+            path: 'academicDepartment',
+            populate: {
+                path: 'academicFaculty',
+            },
+        });
 
     if (!students.length) {
         throw Error('No student found!');
@@ -12,7 +19,14 @@ const getAllStudentsFromDB = async () => {
 };
 
 const getSingleStudentFromDB = async (studentId: string) => {
-    const student = await Student.findById(studentId);
+    const student = await Student.findById(studentId)
+        .populate('semester')
+        .populate({
+            path: 'academicDepartment',
+            populate: {
+                path: 'academicFaculty',
+            },
+        });
 
     if (!student) {
         throw Error('Student not found!');
