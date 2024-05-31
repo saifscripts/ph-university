@@ -7,9 +7,7 @@ import { User } from './user.model';
 import { generateId } from './user.util';
 
 const createStudentIntoDB = async (password: string, payload: IStudent) => {
-    const admissionSemester = await Semester.findById(
-        payload.admissionSemester,
-    );
+    const admissionSemester = await Semester.findById(payload.semester);
 
     if (!admissionSemester) {
         throw Error('Semester not found!');
