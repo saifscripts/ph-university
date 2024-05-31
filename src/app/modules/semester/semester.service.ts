@@ -1,10 +1,15 @@
+import httpStatus from 'http-status';
+import AppError from '../../errors/AppError';
 import { SemesterNameCodeMapper } from './semester.constant';
 import { ISemester } from './semester.interface';
 import { Semester } from './semester.model';
 
 const createSemesterIntoDB = async (payload: ISemester) => {
     if (SemesterNameCodeMapper[payload.name] !== payload.code) {
-        throw Error('Semester code mismatched!');
+        throw new AppError(
+            httpStatus.UNPROCESSABLE_ENTITY,
+            'Semester code mismatched!',
+        );
     }
 
     const newSemester = await Semester.create(payload);
@@ -20,7 +25,7 @@ const getSingleSemesterFromDB = async (semesterId: string) => {
     const semester = await Semester.findById(semesterId);
 
     if (!semester) {
-        throw Error('Semester not found!');
+        throw new AppError(httpStatus.NOT_FOUND, 'Semester not found!');
     }
 
     return semester;
@@ -30,9 +35,13 @@ const updateSemesterIntoDB = async (semesterId: string, payload: ISemester) => {
     const { name, code } = payload;
 
     if (name && code && SemesterNameCodeMapper[name] !== code) {
-        throw Error('Semester code mismatched!');
+        throw new AppError(
+            httpStatus.UNPROCESSABLE_ENTITY,
+            'Semester code mismatched!',
+        );
     } else if (!name || !code) {
-        throw Error(
+        throw new AppError(
+            httpStatus.UNPROCESSABLE_ENTITY,
             "You can't update only semester name/code! Please update both name and code",
         );
     }
@@ -45,7 +54,7 @@ const updateSemesterIntoDB = async (semesterId: string, payload: ISemester) => {
     );
 
     if (!updatedSemester) {
-        throw Error('Semester not found!');
+        throw new AppError(httpStatus.NOT_FOUND, 'Semester not found!');
     }
 
     return updatedSemester;

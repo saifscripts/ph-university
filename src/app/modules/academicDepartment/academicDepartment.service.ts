@@ -1,3 +1,5 @@
+import httpStatus from 'http-status';
+import AppError from '../../errors/AppError';
 import { IAcademicDepartment } from './academicDepartment.interface';
 import { AcademicDepartment } from './academicDepartment.model';
 
@@ -19,7 +21,10 @@ const getSingleAcademicDepartmentFromDB = async (DepartmentId: string) => {
         );
 
     if (!academicDepartment) {
-        throw Error('Academic Department does not exist!');
+        throw new AppError(
+            httpStatus.NOT_FOUND,
+            'Academic Department does not exist!',
+        );
     }
 
     return academicDepartment;

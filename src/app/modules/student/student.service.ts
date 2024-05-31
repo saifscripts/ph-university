@@ -1,3 +1,5 @@
+import httpStatus from 'http-status';
+import AppError from '../../errors/AppError';
 import { IStudent } from './student.interface';
 import { Student } from './student.model';
 
@@ -12,7 +14,7 @@ const getAllStudentsFromDB = async () => {
         });
 
     if (!students.length) {
-        throw Error('No student found!');
+        throw new AppError(httpStatus.NOT_FOUND, 'No student found!');
     }
 
     return students;
@@ -29,7 +31,7 @@ const getSingleStudentFromDB = async (studentId: string) => {
         });
 
     if (!student) {
-        throw Error('Student not found!');
+        throw new AppError(httpStatus.NOT_FOUND, 'Student not found!');
     }
 
     return student;
@@ -41,7 +43,7 @@ const updateStudentIntoDB = async (studentId: string, payload: IStudent) => {
     });
 
     if (!updatedStudent) {
-        throw Error('Student not found!');
+        throw new AppError(httpStatus.NOT_FOUND, 'Student not found!');
     }
 
     return updatedStudent;

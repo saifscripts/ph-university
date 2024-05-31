@@ -1,4 +1,6 @@
+import httpStatus from 'http-status';
 import config from '../../config';
+import AppError from '../../errors/AppError';
 import { Semester } from '../semester/semester.model';
 import { IStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
@@ -10,7 +12,7 @@ const createStudentIntoDB = async (password: string, payload: IStudent) => {
     const admissionSemester = await Semester.findById(payload.semester);
 
     if (!admissionSemester) {
-        throw Error('Semester not found!');
+        throw new AppError(httpStatus.NOT_FOUND, 'Semester not found!');
     }
 
     const userData: Partial<IUser> = {
@@ -22,7 +24,10 @@ const createStudentIntoDB = async (password: string, payload: IStudent) => {
     const newUser = await User.create(userData);
 
     if (!Object.entries(newUser).length) {
-        throw Error('Failed to create user');
+        throw new AppError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            'Failed to create user',
+        );
     }
 
     const newStudent = await Student.create({

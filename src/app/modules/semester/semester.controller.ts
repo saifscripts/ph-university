@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+import AppError from '../../errors/AppError';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { SemesterServices } from './semester.service';
@@ -17,7 +18,7 @@ const getAllSemesters = catchAsync(async (_req, res) => {
     const semesters = await SemesterServices.getAllSemestersFromDB();
 
     if (!semesters.length) {
-        throw Error('No semester found!');
+        throw new AppError(httpStatus.NOT_FOUND, 'No semester found!');
     }
 
     sendResponse(res, {
