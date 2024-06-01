@@ -45,6 +45,7 @@ const updateSemesterIntoDB = async (semesterId: string, payload: ISemester) => {
             "You can't update only semester name/code! Please update both name and code",
         );
     }
+
     // handle semester-already-exists
 
     const updatedSemester = await Semester.findByIdAndUpdate(

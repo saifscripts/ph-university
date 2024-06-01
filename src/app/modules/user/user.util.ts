@@ -1,20 +1,26 @@
 import { ISemester } from '../semester/semester.interface';
-import { User } from './user.model';
+import { Student } from '../student/student.model';
 
-const findLastStudentId = async () => {
-    const lastStudent = await User.findOne({
-        role: 'student',
-    })
-        .select('id -_id')
-        .sort({ createdAt: -1 })
-        .lean();
+const findLastStudentId = async (year: string, code: string) => {
+    const regex = RegExp(`^${year}${code}`);
 
-    return lastStudent?.id ? Number(lastStudent.id.substring(6)) : undefined;
+    const lastStudent = await Student.findOne(
+        { id: regex },
+        { id: 1 },
+        { disableMiddleware: true },
+    ).sort({
+        id: -1,
+    });
+
+    return lastStudent?.id ? lastStudent.id.substring(6) : undefined;
 };
 
 export const generateId = async (payload: ISemester) => {
-    const currentId = (await findLastStudentId()) || 0;
-    const newId = (currentId + 1).toString().padStart(4, '0');
+    const { year, code } = payload;
 
-    return `${payload.year}${payload.code}${newId}`;
+    const lastStudentId = await findLastStudentId(year, code);
+    const currentId: number = Number(lastStudentId) || 0;
+    const incrementedId: string = (currentId + 1).toString().padStart(4, '0');
+
+    return `${year}${code}${incrementedId}`;
 };

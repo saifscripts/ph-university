@@ -3,18 +3,23 @@ import { Schema, model } from 'mongoose';
 import AppError from '../../errors/AppError';
 import { IAcademicDepartment } from './academicDepartment.interface';
 
-const academicDepartmentSchema = new Schema<IAcademicDepartment>({
-    name: {
-        type: String,
-        required: true,
-        unique: true,
+const academicDepartmentSchema = new Schema<IAcademicDepartment>(
+    {
+        name: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        academicFaculty: {
+            type: Schema.Types.ObjectId,
+            ref: 'AcademicFaculty',
+            required: true,
+        },
     },
-    academicFaculty: {
-        type: Schema.Types.ObjectId,
-        ref: 'AcademicFaculty',
-        required: true,
+    {
+        timestamps: true,
     },
-});
+);
 
 academicDepartmentSchema.pre('save', async function (next) {
     const isDepartmentExist = await AcademicDepartment.findOne({

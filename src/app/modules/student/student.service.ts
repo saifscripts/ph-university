@@ -6,14 +6,14 @@ import { IStudent } from './student.interface';
 import { Student } from './student.model';
 
 const getAllStudentsFromDB = async () => {
-    const students = await Student.find()
-        .populate('semester')
-        .populate({
-            path: 'academicDepartment',
-            populate: {
-                path: 'academicFaculty',
-            },
-        });
+    const students = await Student.find().select('id semester isDeleted');
+    // .populate('semester')
+    // .populate({
+    //     path: 'academicDepartment',
+    //     populate: {
+    //         path: 'academicFaculty',
+    //     },
+    // });
 
     if (!students.length) {
         throw new AppError(httpStatus.NOT_FOUND, 'No student found!');
@@ -57,6 +57,7 @@ const updateStudentIntoDB = async (id: string, payload: Partial<IStudent>) => {
             modifiedData[`guardian.${key}`] = value;
         }
     }
+
     if (localGuardian && Object.keys(localGuardian).length) {
         for (const [key, value] of Object.entries(localGuardian)) {
             modifiedData[`localGuardian.${key}`] = value;

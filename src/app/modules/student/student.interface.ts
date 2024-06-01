@@ -1,4 +1,4 @@
-import mongoose, { Types } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 
 export interface IUserName {
     firstName: string;
@@ -39,4 +39,8 @@ export interface IStudent {
     semester: Types.ObjectId;
     academicDepartment: Types.ObjectId;
     isDeleted: boolean;
+}
+
+export interface StudentModel extends Model<IStudent> {
+    isUserExists(id: string): Promise<IStudent | null>;
 }

@@ -3,13 +3,18 @@ import { Schema, model } from 'mongoose';
 import AppError from '../../errors/AppError';
 import { IAcademicFaculty } from './academicFaculty.interface';
 
-const academicFacultySchema = new Schema<IAcademicFaculty>({
-    name: {
-        type: String,
-        required: true,
-        unique: true,
+const academicFacultySchema = new Schema<IAcademicFaculty>(
+    {
+        name: {
+            type: String,
+            required: true,
+            unique: true,
+        },
     },
-});
+    {
+        timestamps: true,
+    },
+);
 
 academicFacultySchema.pre('save', async function (next) {
     const isFacultyExist = await AcademicFaculty.findOne({
