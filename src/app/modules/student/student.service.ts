@@ -6,14 +6,14 @@ import { IStudent } from './student.interface';
 import { Student } from './student.model';
 
 const getAllStudentsFromDB = async () => {
-    const students = await Student.find().select('id semester isDeleted');
-    // .populate('semester')
-    // .populate({
-    //     path: 'academicDepartment',
-    //     populate: {
-    //         path: 'academicFaculty',
-    //     },
-    // });
+    const students = await Student.find()
+        .populate('semester')
+        .populate({
+            path: 'academicDepartment',
+            populate: {
+                path: 'academicFaculty',
+            },
+        });
 
     if (!students.length) {
         throw new AppError(httpStatus.NOT_FOUND, 'No student found!');
