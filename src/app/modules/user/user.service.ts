@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+import mongoose from 'mongoose';
 import config from '../../config';
 import AppError from '../../errors/AppError';
 import { Semester } from '../semester/semester.model';
@@ -21,22 +22,30 @@ const createStudentIntoDB = async (password: string, payload: IStudent) => {
         role: 'student',
     };
 
-    const newUser = await User.create(userData);
+    const session = await mongoose.startSession();
 
-    if (!Object.entries(newUser).length) {
-        throw new AppError(
-            httpStatus.INTERNAL_SERVER_ERROR,
-            'Failed to create user',
-        );
+    try {
+        session.startTransaction();
+        const newUser = await User.create([userData], { session });
+
+        if (!newUser.length) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user');
+        }
+
+        const newStudent = await Student.create({
+            ...payload,
+            id: newUser[0].id,
+            user: newUser[0]._id,
+        });
+
+        await session.commitTransaction();
+        await session.endSession();
+        return newStudent;
+    } catch (error) {
+        await session.abortTransaction();
+        await session.endSession();
+        throw error;
     }
-
-    const newStudent = await Student.create({
-        ...payload,
-        id: newUser.id,
-        user: newUser._id,
-    });
-
-    return newStudent;
 };
 
 export const UserServices = {

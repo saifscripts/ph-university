@@ -105,6 +105,7 @@ const studentSchema = new Schema<IStudent>(
         email: {
             type: String,
             required: true,
+            unique: true,
         },
         contactNo: {
             type: String,
