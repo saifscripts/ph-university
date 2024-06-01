@@ -22,8 +22,8 @@ const getAllStudentsFromDB = async () => {
     return students;
 };
 
-const getSingleStudentFromDB = async (studentId: string) => {
-    const student = await Student.findById(studentId)
+const getSingleStudentFromDB = async (id: string) => {
+    const student = await Student.findOne({ id })
         .populate('semester')
         .populate({
             path: 'academicDepartment',
@@ -39,10 +39,37 @@ const getSingleStudentFromDB = async (studentId: string) => {
     return student;
 };
 
-const updateStudentIntoDB = async (studentId: string, payload: IStudent) => {
-    const updatedStudent = await Student.findByIdAndUpdate(studentId, payload, {
-        new: true,
-    });
+const updateStudentIntoDB = async (id: string, payload: Partial<IStudent>) => {
+    const { name, guardian, localGuardian, ...remainingData } = payload;
+
+    const modifiedData: Record<string, unknown> = {
+        ...remainingData,
+    };
+
+    if (name && Object.keys(name).length) {
+        for (const [key, value] of Object.entries(name)) {
+            modifiedData[`name.${key}`] = value;
+        }
+    }
+
+    if (guardian && Object.keys(guardian).length) {
+        for (const [key, value] of Object.entries(guardian)) {
+            modifiedData[`guardian.${key}`] = value;
+        }
+    }
+    if (localGuardian && Object.keys(localGuardian).length) {
+        for (const [key, value] of Object.entries(localGuardian)) {
+            modifiedData[`localGuardian.${key}`] = value;
+        }
+    }
+
+    const updatedStudent = await Student.findOneAndUpdate(
+        { id },
+        modifiedData,
+        {
+            new: true,
+        },
+    );
 
     if (!updatedStudent) {
         throw new AppError(httpStatus.NOT_FOUND, 'Student not found!');

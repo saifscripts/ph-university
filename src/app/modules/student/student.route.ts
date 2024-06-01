@@ -11,7 +11,9 @@ router
     .route('/:studentId')
     .get(StudentControllers.getSingleStudent)
     .patch(
-        validateRequest(StudentValidations.studentValidationSchema.partial()),
+        validateRequest(
+            StudentValidations.studentValidationSchema.deepPartial(),
+        ),
         StudentControllers.updateStudent,
     )
     .delete(StudentControllers.deleteStudent);
