@@ -1,22 +1,11 @@
 import { ErrorRequestHandler } from 'express';
 import httpStatus from 'http-status';
+import mongoose from 'mongoose';
 import { ZodError } from 'zod';
 import config from '../config';
+import handleValidationError from '../errors/handleValidationError';
+import handleZodError from '../errors/handleZodError';
 import { IErrorSources } from '../interfaces/errors';
-
-const handleZodError = (err: ZodError) => {
-    const errorSources: IErrorSources = err.issues.map((issue) => ({
-        path: issue?.path[issue?.path.length - 1],
-        message: issue?.message,
-    }));
-
-    return {
-        statusCode: 400,
-        message: 'Validation Error!',
-        errorSources,
-        stack: config.NODE_ENV === 'development' ? err?.stack : null,
-    };
-};
 
 const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     let statusCode = err.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
@@ -27,7 +16,6 @@ const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
             message: 'Something went wrong!',
         },
     ];
-    let stack = config.NODE_ENV === 'development' ? err?.stack : null;
 
     if (err instanceof ZodError) {
         const formattedError = handleZodError(err);
@@ -35,14 +23,19 @@ const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
         statusCode = formattedError.statusCode;
         message = formattedError.message;
         errorSources = formattedError.errorSources;
-        stack = formattedError.stack;
+    } else if (err instanceof mongoose.Error.ValidationError) {
+        const formattedError = handleValidationError(err);
+
+        statusCode = formattedError.statusCode;
+        message = formattedError.message;
+        errorSources = formattedError.errorSources;
     }
 
     return res.status(statusCode).json({
         success: false,
         message,
         errorSources,
-        stack,
+        stack: config.NODE_ENV === 'development' ? err?.stack : null,
     });
 };
 
