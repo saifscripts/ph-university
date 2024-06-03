@@ -7,25 +7,49 @@ import { Student } from './student.model';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     const searchTerm = (query?.searchTerm as string) || '';
-
-    const students = await Student.find({
-        $or: [
-            'name.firstName',
-            'name.middleName',
-            'name.lastName',
-            'presentAddress',
-        ].map((field) => ({
+    const searchFields = [
+        'name.firstName',
+        'name.middleName',
+        'name.lastName',
+        'presentAddress',
+    ];
+    const searchQuery = Student.find({
+        $or: searchFields.map((field) => ({
             [field]: { $regex: searchTerm, $options: 'i' },
         })),
-    })
-        .populate('semester')
-        .populate({
-            path: 'academicDepartment',
-            populate: {
-                path: 'academicFaculty',
-            },
-        })
-        .select('id name presentAddress');
+    });
+
+    const excludeFields = ['searchTerm', 'sort', 'limit'];
+    const findQueryFields = { ...query };
+    excludeFields.forEach((field) => delete findQueryFields[field]);
+
+    const filterQuery = searchQuery.find(findQueryFields);
+    // .populate('semester')
+    // .populate({
+    //     path: 'academicDepartment',
+    //     populate: {
+    //         path: 'academicFaculty',
+    //     },
+    // })
+    // .select('id name presentAddress');
+
+    let sort = '-createdAt';
+
+    if (query.sort) {
+        sort = query.sort as string;
+    }
+
+    const sortQuery = filterQuery.sort(sort);
+
+    let limit = 10;
+
+    if (query.limit) {
+        limit = Number(query.limit);
+    }
+
+    const limitQuery = sortQuery.limit(limit);
+
+    const students = await limitQuery;
 
     if (!students.length) {
         throw new AppError(httpStatus.NOT_FOUND, 'No student found!');
