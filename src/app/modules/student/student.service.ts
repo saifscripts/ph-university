@@ -5,15 +5,27 @@ import { User } from '../user/user.model';
 import { IStudent } from './student.interface';
 import { Student } from './student.model';
 
-const getAllStudentsFromDB = async () => {
-    const students = await Student.find()
+const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
+    const searchTerm = (query?.searchTerm as string) || '';
+
+    const students = await Student.find({
+        $or: [
+            'name.firstName',
+            'name.middleName',
+            'name.lastName',
+            'presentAddress',
+        ].map((field) => ({
+            [field]: { $regex: searchTerm, $options: 'i' },
+        })),
+    })
         .populate('semester')
         .populate({
             path: 'academicDepartment',
             populate: {
                 path: 'academicFaculty',
             },
-        });
+        })
+        .select('id name presentAddress');
 
     if (!students.length) {
         throw new AppError(httpStatus.NOT_FOUND, 'No student found!');
