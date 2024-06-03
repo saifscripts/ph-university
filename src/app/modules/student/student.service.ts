@@ -1,54 +1,36 @@
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
+import QueryBuilder from '../../builders/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { User } from '../user/user.model';
+import { studentSearchableFields } from './student.constant';
 import { IStudent } from './student.interface';
 import { Student } from './student.model';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
-    const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
+    const studentQuery = new QueryBuilder(
+        Student.find()
+            .populate('semester')
+            .populate({
+                path: 'academicDepartment',
+                populate: {
+                    path: 'academicFaculty',
+                },
+            }),
+        query,
+    )
+        .search(studentSearchableFields)
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
 
-    const searchTerm = (query?.searchTerm as string) || '';
-    const searchFields = [
-        'name.firstName',
-        'name.middleName',
-        'name.lastName',
-        'presentAddress',
-    ];
-    const searchQuery = Student.find({
-        $or: searchFields.map((field) => ({
-            [field]: { $regex: searchTerm, $options: 'i' },
-        })),
-    });
+    const students = await studentQuery.modelQuery;
 
-    const _query = { ...query };
-    excludeFields.forEach((field) => delete _query[field]);
-    const filterQuery = searchQuery.find(_query);
-    // .populate('semester')
-    // .populate({
-    //     path: 'academicDepartment',
-    //     populate: {
-    //         path: 'academicFaculty',
-    //     },
-    // });
-
-    let sort = query.sort ? (query.sort as string) : '-createdAt';
-    const sortQuery = filterQuery.sort(sort);
-
-    let limit = query.limit ? Number(query.limit) : 10;
-    let page = query.page ? Number(query.page) : 1;
-    let skip = query.page ? (page - 1) * limit : 0;
-    const paginateQuery = sortQuery.skip(skip).limit(limit);
-
-    const fields = query?.fields
-        ? (query.fields as string).split(',').join(' ')
-        : '-__v';
-    const fieldQuery = paginateQuery.select(fields);
-
-    const students = await fieldQuery;
     if (!students.length) {
         throw new AppError(httpStatus.NOT_FOUND, 'No student found!');
     }
+
     return students;
 };
 
