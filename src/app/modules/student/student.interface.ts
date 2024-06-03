@@ -1,10 +1,5 @@
-import mongoose, { Model, Types } from 'mongoose';
-
-export interface IUserName {
-    firstName: string;
-    middleName?: string;
-    lastName: string;
-}
+import mongoose, { Model } from 'mongoose';
+import { IUserName } from '../user/user.interface';
 
 export interface IGuardian {
     fatherName: string;
@@ -36,8 +31,8 @@ export interface IStudent {
     guardian: IGuardian;
     localGuardian: ILocalGuardian;
     profileImage: string;
-    semester: Types.ObjectId;
-    academicDepartment: Types.ObjectId;
+    semester: mongoose.Types.ObjectId;
+    academicDepartment: mongoose.Types.ObjectId;
     isDeleted: boolean;
 }
 

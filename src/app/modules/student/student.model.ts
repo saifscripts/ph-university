@@ -1,32 +1,11 @@
 import { Schema, model } from 'mongoose';
+import { userNameSchema } from '../user/user.model';
 import {
     IGuardian,
     ILocalGuardian,
     IStudent,
-    IUserName,
     StudentModel,
 } from './student.interface';
-
-const userNameSchema = new Schema<IUserName>(
-    {
-        firstName: {
-            type: String,
-            required: true,
-            trim: true,
-            maxLength: [20, 'First Name can not be more than 20 characters'],
-        },
-        middleName: { type: String, trim: true },
-        lastName: {
-            type: String,
-            required: true,
-            trim: true,
-            maxLength: [20, 'Last Name can not be more than 20 characters'],
-        },
-    },
-    {
-        _id: false,
-    },
-);
 
 const guardianSchema = new Schema<IGuardian>(
     {
@@ -162,7 +141,7 @@ studentSchema.pre('find', function (next) {
 });
 
 studentSchema.pre('findOne', function (next) {
-    if (this.getOptions().disableMiddleware) {
+    if (this.getOptions().getDeletedStudents) {
         return next();
     }
 

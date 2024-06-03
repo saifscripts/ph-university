@@ -1,12 +1,5 @@
 import { z } from 'zod';
-
-const userNameValidationSchema = z.object({
-    firstName: z.string({
-        required_error: 'First Name is required',
-    }),
-    middleName: z.string().optional(),
-    lastName: z.string(),
-});
+import { userNameValidationSchema } from '../user/user.validation';
 
 const guardianValidationSchema = z.object({
     fatherName: z.string(),

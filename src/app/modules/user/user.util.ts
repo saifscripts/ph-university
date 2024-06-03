@@ -7,7 +7,7 @@ const findLastStudentId = async (year: string, code: string) => {
     const lastStudent = await Student.findOne(
         { id: regex },
         { id: 1 },
-        { disableMiddleware: true },
+        { getDeletedStudents: true },
     ).sort({
         id: -1,
     });

@@ -1,7 +1,29 @@
 import bcrypt from 'bcrypt';
 import { Schema, model } from 'mongoose';
 import config from '../../config';
-import { IUser } from './user.interface';
+import { IUser, IUserName } from './user.interface';
+
+// will be used in student, faculty and admin module
+export const userNameSchema = new Schema<IUserName>(
+    {
+        firstName: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: [20, 'First Name can not be more than 20 characters'],
+        },
+        middleName: { type: String, trim: true },
+        lastName: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: [20, 'Last Name can not be more than 20 characters'],
+        },
+    },
+    {
+        _id: false,
+    },
+);
 
 const userSchema = new Schema<IUser>(
     {
