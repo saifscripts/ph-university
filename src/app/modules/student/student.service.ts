@@ -6,6 +6,8 @@ import { IStudent } from './student.interface';
 import { Student } from './student.model';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
+    const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
+
     const searchTerm = (query?.searchTerm as string) || '';
     const searchFields = [
         'name.firstName',
@@ -19,42 +21,34 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
         })),
     });
 
-    const excludeFields = ['searchTerm', 'sort', 'limit'];
-    const findQueryFields = { ...query };
-    excludeFields.forEach((field) => delete findQueryFields[field]);
-
-    const filterQuery = searchQuery.find(findQueryFields);
+    const _query = { ...query };
+    excludeFields.forEach((field) => delete _query[field]);
+    const filterQuery = searchQuery.find(_query);
     // .populate('semester')
     // .populate({
     //     path: 'academicDepartment',
     //     populate: {
     //         path: 'academicFaculty',
     //     },
-    // })
-    // .select('id name presentAddress');
+    // });
 
-    let sort = '-createdAt';
-
-    if (query.sort) {
-        sort = query.sort as string;
-    }
-
+    let sort = query.sort ? (query.sort as string) : '-createdAt';
     const sortQuery = filterQuery.sort(sort);
 
-    let limit = 10;
+    let limit = query.limit ? Number(query.limit) : 10;
+    let page = query.page ? Number(query.page) : 1;
+    let skip = query.page ? (page - 1) * limit : 0;
+    const paginateQuery = sortQuery.skip(skip).limit(limit);
 
-    if (query.limit) {
-        limit = Number(query.limit);
-    }
+    const fields = query?.fields
+        ? (query.fields as string).split(',').join(' ')
+        : '-__v';
+    const fieldQuery = paginateQuery.select(fields);
 
-    const limitQuery = sortQuery.limit(limit);
-
-    const students = await limitQuery;
-
+    const students = await fieldQuery;
     if (!students.length) {
         throw new AppError(httpStatus.NOT_FOUND, 'No student found!');
     }
-
     return students;
 };
 
