@@ -11,6 +11,6 @@ export interface IErrorResponse {
 
 export interface IDuplicateError extends Error {
     code: number;
-    keyValue: { [key: string]: any };
+    keyValue: { [key: string]: string };
     errmsg?: string;
 }
