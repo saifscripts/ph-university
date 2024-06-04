@@ -31,6 +31,12 @@ const createStudentValidationSchema = userValidationSchema.merge(
 //     }),
 // );
 
+// const createAdminValidationSchema = userValidationSchema.merge(
+//     z.object({
+//         admin: AdminValidations.adminValidationSchema,
+//     }),
+// );
+
 const createFacultyValidationSchema = userValidationSchema.merge(
     z.object({
         faculty: z.object({
@@ -50,8 +56,27 @@ const createFacultyValidationSchema = userValidationSchema.merge(
     }),
 );
 
+const createAdminValidationSchema = userValidationSchema.merge(
+    z.object({
+        admin: z.object({
+            name: userNameValidationSchema,
+            designation: z.string(),
+            gender: z.enum(['male', 'female', 'other']),
+            dateOfBirth: z.string(),
+            email: z.string().email(),
+            contactNo: z.string(),
+            emergencyContactNo: z.string(),
+            presentAddress: z.string(),
+            permanentAddress: z.string(),
+            profileImage: z.string().url(),
+            managementDepartment: z.string(),
+        }),
+    }),
+);
+
 export const UserValidations = {
     userValidationSchema,
     createStudentValidationSchema,
     createFacultyValidationSchema,
+    createAdminValidationSchema,
 };

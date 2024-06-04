@@ -1,3 +1,4 @@
+import { Admin } from '../admin/admin.model';
 import { Faculty } from '../faculty/faculty.model';
 import { ISemester } from '../semester/semester.interface';
 import { Student } from '../student/student.model';
@@ -28,6 +29,18 @@ const findLastFacultyId = async () => {
     return lastFaculty?.id ? lastFaculty.id.substring(2) : undefined;
 };
 
+const findLastAdminId = async () => {
+    const lastAdmin = await Admin.findOne(
+        {},
+        { id: 1 },
+        { getDeletedAdmins: true },
+    ).sort({
+        id: -1,
+    });
+
+    return lastAdmin?.id ? lastAdmin.id.substring(2) : undefined;
+};
+
 export const generateStudentId = async (payload: ISemester) => {
     const { year, code } = payload;
 
@@ -44,4 +57,12 @@ export const generateFacultyId = async () => {
     const incrementedId: string = (currentId + 1).toString().padStart(4, '0');
 
     return `F-${incrementedId}`;
+};
+
+export const generateAdminId = async () => {
+    const lastAdminId = await findLastAdminId();
+    const currentId: number = Number(lastAdminId) || 0;
+    const incrementedId: string = (currentId + 1).toString().padStart(4, '0');
+
+    return `A-${incrementedId}`;
 };
