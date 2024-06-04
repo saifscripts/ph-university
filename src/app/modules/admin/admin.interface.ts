@@ -1,5 +1,10 @@
 import mongoose, { Model } from 'mongoose';
-import { IUserName } from '../user/user.interface';
+
+export interface IUserName {
+    firstName: string;
+    middleName?: string;
+    lastName: string;
+}
 
 export interface IAdmin {
     id: string;

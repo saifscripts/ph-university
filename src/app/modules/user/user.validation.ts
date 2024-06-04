@@ -1,14 +1,7 @@
 import { z } from 'zod';
+import { AdminValidations } from '../admin/admin.validation';
+import { FacultyValidations } from '../faculty/faculty.validation';
 import { StudentValidations } from '../student/student.validation';
-
-// will be used in student, faculty and admin module
-export const userNameValidationSchema = z.object({
-    firstName: z.string({
-        required_error: 'First Name is required',
-    }),
-    middleName: z.string().optional(),
-    lastName: z.string(),
-});
 
 const userValidationSchema = z.object({
     password: z
@@ -25,52 +18,15 @@ const createStudentValidationSchema = userValidationSchema.merge(
     }),
 );
 
-// const createFacultyValidationSchema = userValidationSchema.merge(
-//     z.object({
-//         faculty: FacultyValidations?.facultyValidationSchema,
-//     }),
-// );
-
-// const createAdminValidationSchema = userValidationSchema.merge(
-//     z.object({
-//         admin: AdminValidations.adminValidationSchema,
-//     }),
-// );
-
 const createFacultyValidationSchema = userValidationSchema.merge(
     z.object({
-        faculty: z.object({
-            name: userNameValidationSchema,
-            designation: z.string(),
-            gender: z.enum(['male', 'female', 'other']),
-            dateOfBirth: z.string(),
-            email: z.string().email(),
-            contactNo: z.string(),
-            emergencyContactNo: z.string(),
-            presentAddress: z.string(),
-            permanentAddress: z.string(),
-            profileImage: z.string().url(),
-            academicFaculty: z.string(),
-            academicDepartment: z.string(),
-        }),
+        faculty: FacultyValidations.facultyValidationSchema,
     }),
 );
 
 const createAdminValidationSchema = userValidationSchema.merge(
     z.object({
-        admin: z.object({
-            name: userNameValidationSchema,
-            designation: z.string(),
-            gender: z.enum(['male', 'female', 'other']),
-            dateOfBirth: z.string(),
-            email: z.string().email(),
-            contactNo: z.string(),
-            emergencyContactNo: z.string(),
-            presentAddress: z.string(),
-            permanentAddress: z.string(),
-            profileImage: z.string().url(),
-            managementDepartment: z.string(),
-        }),
+        admin: AdminValidations.adminValidationSchema,
     }),
 );
 

@@ -1,6 +1,26 @@
 import { Schema, model } from 'mongoose';
-import { userNameSchema } from '../user/user.model';
-import { AdminModel, IAdmin } from './admin.interface';
+import { AdminModel, IAdmin, IUserName } from './admin.interface';
+
+export const userNameSchema = new Schema<IUserName>(
+    {
+        firstName: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: [20, 'First Name can not be more than 20 characters'],
+        },
+        middleName: { type: String, trim: true },
+        lastName: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: [20, 'Last Name can not be more than 20 characters'],
+        },
+    },
+    {
+        _id: false,
+    },
+);
 
 const adminSchema = new Schema<IAdmin, AdminModel>(
     {
