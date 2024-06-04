@@ -69,7 +69,7 @@ const updateAdminIntoDB = async (id: string, payload: Partial<IAdmin>) => {
     });
 
     if (!updatedAdmin) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Faculty not found!');
+        throw new AppError(httpStatus.NOT_FOUND, 'Admin not found!');
     }
 
     return updatedAdmin;
@@ -90,7 +90,7 @@ const deleteAdminFromDB = async (id: string) => {
         if (!deletedAdmin) {
             throw new AppError(
                 httpStatus.BAD_REQUEST,
-                'Failed to delete Faculty!',
+                'Failed to delete Admin!',
             );
         }
 

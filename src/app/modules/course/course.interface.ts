@@ -10,6 +10,6 @@ export interface ICourse {
     prefix: string;
     code: number;
     credits: number;
-    preRequisiteCourses: IPreRequisiteCourse[];
+    preRequisiteCourses?: IPreRequisiteCourse[];
     isDeleted: boolean;
 }

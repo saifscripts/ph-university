@@ -1,17 +1,22 @@
 import { Schema, model } from 'mongoose';
 import { ICourse, IPreRequisiteCourse } from './course.interface';
 
-const preRequisiteCourseSchema = new Schema<IPreRequisiteCourse>({
-    course: {
-        type: Schema.ObjectId,
-        ref: 'Course',
-        required: true,
+const preRequisiteCourseSchema = new Schema<IPreRequisiteCourse>(
+    {
+        course: {
+            type: Schema.ObjectId,
+            ref: 'Course',
+            required: true,
+        },
+        isDeleted: {
+            type: Boolean,
+            default: false,
+        },
     },
-    isDeleted: {
-        type: Boolean,
-        default: false,
+    {
+        _id: false,
     },
-});
+);
 
 const courseSchema = new Schema<ICourse>({
     title: {
@@ -38,6 +43,22 @@ const courseSchema = new Schema<ICourse>({
         type: Boolean,
         default: false,
     },
+});
+
+// Query Middleware
+courseSchema.pre('find', function (next) {
+    this.find({ isDeleted: { $ne: true } });
+    next();
+});
+
+courseSchema.pre('findOne', function (next) {
+    this.find({ isDeleted: { $ne: true } });
+    next();
+});
+
+courseSchema.pre('aggregate', function (next) {
+    this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+    next();
 });
 
 export const Course = model<ICourse>('Course', courseSchema);
