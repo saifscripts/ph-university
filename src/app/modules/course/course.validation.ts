@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { z } from 'zod';
 
-const preRequisiteCourseValidationSchema = z.object({
+const createPreRequisiteCourseValidationSchema = z.object({
     course: z
         .string()
         .refine((value) => mongoose.Types.ObjectId.isValid(value), {
@@ -9,14 +9,36 @@ const preRequisiteCourseValidationSchema = z.object({
         }),
 });
 
-const courseValidationSchema = z.object({
+const updatePreRequisiteCourseValidationSchema = z.object({
+    course: z
+        .string()
+        .refine((value) => mongoose.Types.ObjectId.isValid(value), {
+            message: 'Invalid ObjectId',
+        }),
+    isDeleted: z.boolean().optional(),
+});
+
+const createCourseValidationSchema = z.object({
     title: z.string(),
     prefix: z.string(),
     code: z.number(),
     credits: z.number(),
-    preRequisiteCourses: z.array(preRequisiteCourseValidationSchema).optional(),
+    preRequisiteCourses: z
+        .array(createPreRequisiteCourseValidationSchema)
+        .optional(),
+});
+
+const updateCourseValidationSchema = z.object({
+    title: z.string().optional(),
+    prefix: z.string().optional(),
+    code: z.number().optional(),
+    credits: z.number().optional(),
+    preRequisiteCourses: z
+        .array(updatePreRequisiteCourseValidationSchema)
+        .optional(),
 });
 
 export const CourseValidations = {
-    courseValidationSchema,
+    createCourseValidationSchema,
+    updateCourseValidationSchema,
 };

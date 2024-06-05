@@ -43,13 +43,53 @@ const getSingleCourseFromDB = async (id: string) => {
 };
 
 const updateCourseIntoDB = async (id: string, payload: Partial<ICourse>) => {
-    const updatedCourse = await Course.findByIdAndUpdate(id, payload, {
-        new: true,
-    });
+    const { preRequisiteCourses, ...remainingCourseData } = payload;
 
-    if (!updatedCourse) {
+    // update remaining course data
+    const updatedCourseData = await Course.findByIdAndUpdate(
+        id,
+        remainingCourseData,
+    );
+
+    if (!updatedCourseData) {
         throw new AppError(httpStatus.NOT_FOUND, 'Course not found!');
     }
+
+    if (preRequisiteCourses && preRequisiteCourses.length) {
+        const deletePreRequisites = preRequisiteCourses
+            .filter((el) => el.course && el.isDeleted)
+            .map((el) => el.course);
+
+        await Course.findByIdAndUpdate(
+            id,
+            {
+                $pull: {
+                    preRequisiteCourses: {
+                        course: { $in: deletePreRequisites },
+                    },
+                },
+            },
+            { new: true },
+        );
+
+        const updatePreRequisites = preRequisiteCourses.filter(
+            (el) => el.course && !el.isDeleted,
+        );
+
+        await Course.findByIdAndUpdate(
+            id,
+            {
+                $addToSet: {
+                    preRequisiteCourses: { $each: updatePreRequisites },
+                },
+            },
+            { new: true },
+        );
+    }
+
+    const updatedCourse = await Course.findById(id).populate(
+        'preRequisiteCourses.course',
+    );
 
     return updatedCourse;
 };
