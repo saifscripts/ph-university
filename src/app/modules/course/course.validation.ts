@@ -38,7 +38,16 @@ const updateCourseValidationSchema = z.object({
         .optional(),
 });
 
+const courseFacultyValidationSchema = z.object({
+    faculties: z.array(
+        z.string().refine((value) => mongoose.Types.ObjectId.isValid(value), {
+            message: 'Invalid ObjectId',
+        }),
+    ),
+});
+
 export const CourseValidations = {
     createCourseValidationSchema,
     updateCourseValidationSchema,
+    courseFacultyValidationSchema,
 };

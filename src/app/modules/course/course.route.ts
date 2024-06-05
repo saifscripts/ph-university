@@ -23,4 +23,11 @@ router
     )
     .delete(CourseControllers.deleteCourse);
 
+router
+    .route('/:id/assign-faculties')
+    .put(
+        validateRequest(CourseValidations.courseFacultyValidationSchema),
+        CourseControllers.assignCourseFaculties,
+    );
+
 export const CourseRoutes = router;

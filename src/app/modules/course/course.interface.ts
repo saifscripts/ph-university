@@ -13,3 +13,8 @@ export interface ICourse {
     preRequisiteCourses?: IPreRequisiteCourse[];
     isDeleted: boolean;
 }
+
+export interface ICourseFaculty {
+    course: mongoose.Types.ObjectId;
+    faculties: mongoose.Types.ObjectId[];
+}
