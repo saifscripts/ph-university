@@ -5,6 +5,7 @@ import { AdminRoutes } from '../modules/admin/admin.route';
 import { CourseRoutes } from '../modules/course/course.route';
 import { FacultyRoutes } from '../modules/faculty/faculty.route';
 import { SemesterRoutes } from '../modules/semester/semester.route';
+import { SemesterRegistrationRoutes } from '../modules/semesterRegistration/semesterRegistration.route';
 import { StudentRoutes } from '../modules/student/student.route';
 import { UserRoutes } from '../modules/user/user.route';
 
@@ -17,6 +18,7 @@ const routes = [
     { path: '/admins', route: AdminRoutes },
     { path: '/courses', route: CourseRoutes },
     { path: '/semesters', route: SemesterRoutes },
+    { path: '/semester-registrations', route: SemesterRegistrationRoutes },
     { path: '/academic-faculties', route: AcademicFacultyRoutes },
     { path: '/academic-departments', route: AcademicDepartmentRoutes },
 ];
