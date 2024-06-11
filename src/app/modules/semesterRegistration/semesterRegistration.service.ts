@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import QueryBuilder from '../../builders/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { Semester } from '../semester/semester.model';
+import { RegistrationStatus } from './semesterRegistration.constant';
 import { ISemesterRegistration } from './semesterRegistration.interface';
 import { SemesterRegistration } from './semesterRegistration.model';
 
@@ -14,7 +15,7 @@ const createSemesterRegistrationIntoDB = async (
     const isSemesterExists = await Semester.findById(semester);
 
     if (!isSemesterExists) {
-        throw new AppError(httpStatus.NOT_FOUND, 'No semester found!');
+        throw new AppError(httpStatus.NOT_FOUND, "Semester doesn't exist!");
     }
 
     // check if semester is already registered
@@ -26,6 +27,19 @@ const createSemesterRegistrationIntoDB = async (
         throw new AppError(
             httpStatus.CONFLICT,
             'Semester is already registered!',
+        );
+    }
+
+    // check if there is any UPCOMING or ONGOING semester
+    const isThereAnyUpcomingOrOngoingSemester =
+        await SemesterRegistration.findOne({
+            status: { $in: ['UPCOMING', 'ONGOING'] },
+        });
+
+    if (isThereAnyUpcomingOrOngoingSemester) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `There is already an ${isThereAnyUpcomingOrOngoingSemester.status} semester`,
         );
     }
 
@@ -71,105 +85,60 @@ const getSingleSemesterRegistrationFromDB = async (id: string) => {
     return semesterRegistration;
 };
 
-// const updateSemesterRegistrationIntoDB = async (
-//     id: string,
-//     payload: Partial<ISemesterRegistration>,
-// ) => {
-//     const {
-//         preRequisiteSemesterRegistrations,
-//         ...remainingSemesterRegistrationData
-//     } = payload;
+const updateSemesterRegistrationIntoDB = async (
+    id: string,
+    payload: Partial<ISemesterRegistration>,
+) => {
+    const isSemesterRegistrationExist = await SemesterRegistration.findById(id);
 
-//     const session = await mongoose.startSession();
+    // check if semester registration exists
+    if (!isSemesterRegistrationExist) {
+        throw new AppError(
+            httpStatus.NOT_FOUND,
+            'Semester registration not found!',
+        );
+    }
 
-//     try {
-//         session.startTransaction();
-//         // update remaining SemesterRegistration data
-//         const updatedSemesterRegistrationData =
-//             await SemesterRegistration.findByIdAndUpdate(
-//                 id,
-//                 remainingSemesterRegistrationData,
-//             );
+    const currentSemesterStatus = isSemesterRegistrationExist?.status;
+    const requestedSemesterStatus = payload?.status;
 
-//         if (!updatedSemesterRegistrationData) {
-//             throw new AppError(
-//                 httpStatus.BAD_REQUEST,
-//                 'Failed to update SemesterRegistration!',
-//             );
-//         }
+    // An 'ended' semester registration cannot be updated
+    if (currentSemesterStatus === RegistrationStatus.ENDED) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            'Semester registration is already ENDED!',
+        );
+    }
 
-//         // delete and add prerequisite SemesterRegistrations
-//         if (
-//             preRequisiteSemesterRegistrations &&
-//             preRequisiteSemesterRegistrations.length
-//         ) {
-//             const deletePreRequisiteSemesterRegistrations =
-//                 preRequisiteSemesterRegistrations
-//                     .filter((el) => el.SemesterRegistration && el.isDeleted)
-//                     .map((el) => el.SemesterRegistration);
+    // An 'upcoming' semester registration status cannot be updated as 'ended'
+    if (
+        currentSemesterStatus === RegistrationStatus.UPCOMING &&
+        requestedSemesterStatus === RegistrationStatus.ENDED
+    ) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            'You cannot update an UPCOMING semester to ENDED Semester!',
+        );
+    }
 
-//             const isPreRequisiteSemesterRegistrationsDeleted =
-//                 await SemesterRegistration.findByIdAndUpdate(
-//                     id,
-//                     {
-//                         $pull: {
-//                             preRequisiteSemesterRegistrations: {
-//                                 SemesterRegistration: {
-//                                     $in: deletePreRequisiteSemesterRegistrations,
-//                                 },
-//                             },
-//                         },
-//                     },
-//                     { new: true },
-//                 );
+    // An 'ongoing' semester registration status cannot be updated as 'upcoming'
+    if (
+        currentSemesterStatus === RegistrationStatus.ONGOING &&
+        requestedSemesterStatus === RegistrationStatus.UPCOMING
+    ) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            'You cannot update an ONGOING semester to UPCOMING Semester!',
+        );
+    }
 
-//             if (!isPreRequisiteSemesterRegistrationsDeleted) {
-//                 throw new AppError(
-//                     httpStatus.BAD_REQUEST,
-//                     'Failed to delete pre-requisite SemesterRegistrations!',
-//                 );
-//             }
+    const results = await SemesterRegistration.findByIdAndUpdate(id, payload, {
+        new: true,
+        runValidators: true,
+    });
 
-//             const updatePreRequisites =
-//                 preRequisiteSemesterRegistrations.filter(
-//                     (el) => el.SemesterRegistration && !el.isDeleted,
-//                 );
-
-//             const isPreRequisiteSemesterRegistrationsAdded =
-//                 await SemesterRegistration.findByIdAndUpdate(
-//                     id,
-//                     {
-//                         $addToSet: {
-//                             preRequisiteSemesterRegistrations: {
-//                                 $each: updatePreRequisites,
-//                             },
-//                         },
-//                     },
-//                     { new: true },
-//                 );
-
-//             if (!isPreRequisiteSemesterRegistrationsAdded) {
-//                 throw new AppError(
-//                     httpStatus.BAD_REQUEST,
-//                     'Failed to add pre-requisite SemesterRegistrations!',
-//                 );
-//             }
-//         }
-
-//         const updatedSemesterRegistration = await SemesterRegistration.findById(
-//             id,
-//         ).populate('preRequisiteSemesterRegistrations.SemesterRegistration');
-
-//         await session.commitTransaction();
-//         session.endSession();
-
-//         return updatedSemesterRegistration;
-//     } catch (error) {
-//         await session.abortTransaction();
-//         session.endSession();
-//         throw error;
-//     }
-// };
+    return results;
+};
 
 // const deleteSemesterRegistrationFromDB = async (id: string) => {
 //     const deletedSemesterRegistration =
@@ -193,6 +162,6 @@ export const SemesterRegistrationServices = {
     createSemesterRegistrationIntoDB,
     getAllSemesterRegistrationsFromDB,
     getSingleSemesterRegistrationFromDB,
-    // updateSemesterRegistrationIntoDB,
+    updateSemesterRegistrationIntoDB,
     // deleteSemesterRegistrationFromDB,
 };
