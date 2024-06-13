@@ -12,23 +12,29 @@ const userValidationSchema = z.object({
         .max(20, { message: 'Maximum password length is 20 characters' }),
 });
 
-const createStudentValidationSchema = userValidationSchema.merge(
-    z.object({
-        student: StudentValidations.studentValidationSchema,
-    }),
-);
+const createStudentValidationSchema = z.object({
+    body: userValidationSchema.merge(
+        z.object({
+            student: StudentValidations.studentValidationSchema,
+        }),
+    ),
+});
 
-const createFacultyValidationSchema = userValidationSchema.merge(
-    z.object({
-        faculty: FacultyValidations.facultyValidationSchema,
-    }),
-);
+const createFacultyValidationSchema = z.object({
+    body: userValidationSchema.merge(
+        z.object({
+            faculty: FacultyValidations.facultyValidationSchema,
+        }),
+    ),
+});
 
-const createAdminValidationSchema = userValidationSchema.merge(
-    z.object({
-        admin: AdminValidations.adminValidationSchema,
-    }),
-);
+const createAdminValidationSchema = z.object({
+    body: userValidationSchema.merge(
+        z.object({
+            admin: AdminValidations.adminValidationSchema,
+        }),
+    ),
+});
 
 export const UserValidations = {
     userValidationSchema,

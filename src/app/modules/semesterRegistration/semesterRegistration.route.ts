@@ -23,7 +23,7 @@ router
     .get(SemesterRegistrationControllers.getSingleSemesterRegistration)
     .patch(
         validateRequest(
-            SemesterRegistrationValidations.semesterRegistrationValidationSchema.partial(),
+            SemesterRegistrationValidations.semesterRegistrationValidationSchema.deepPartial(),
         ),
         SemesterRegistrationControllers.updateSemesterRegistration,
     );

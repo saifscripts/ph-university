@@ -11,9 +11,7 @@ router
     .route('/:facultyId')
     .get(FacultyControllers.getSingleFaculty)
     .patch(
-        validateRequest(
-            FacultyValidations.facultyValidationSchema.deepPartial(),
-        ),
+        validateRequest(FacultyValidations.updateFacultyValidationSchema),
         FacultyControllers.updateFaculty,
     )
     .delete(FacultyControllers.deleteFaculty);

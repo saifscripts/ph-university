@@ -18,7 +18,9 @@ router
     .route('/:semesterId')
     .get(SemesterControllers.getSingleSemester)
     .patch(
-        validateRequest(SemesterValidations.semesterValidationSchema.partial()),
+        validateRequest(
+            SemesterValidations.semesterValidationSchema.deepPartial(),
+        ),
         SemesterControllers.updateSemester,
     );
 

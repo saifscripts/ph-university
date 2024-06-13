@@ -21,7 +21,7 @@ router
     .get(AcademicDepartmentControllers.getSingleAcademicDepartment)
     .patch(
         validateRequest(
-            AcademicDepartmentValidations.academicDepartmentValidationSchema.partial(),
+            AcademicDepartmentValidations.academicDepartmentValidationSchema.deepPartial(),
         ),
         AcademicDepartmentControllers.updateAcademicDepartment,
     );

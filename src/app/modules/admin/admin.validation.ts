@@ -22,6 +22,11 @@ const adminValidationSchema = z.object({
     managementDepartment: z.string(),
 });
 
+const updateAdminValidationSchema = z.object({
+    body: adminValidationSchema.deepPartial(),
+});
+
 export const AdminValidations = {
     adminValidationSchema,
+    updateAdminValidationSchema,
 };

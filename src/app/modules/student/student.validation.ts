@@ -40,6 +40,11 @@ const studentValidationSchema = z.object({
     academicDepartment: z.string(),
 });
 
+const updateStudentValidationSchema = z.object({
+    body: studentValidationSchema.deepPartial(),
+});
+
 export const StudentValidations = {
     studentValidationSchema,
+    updateStudentValidationSchema,
 };

@@ -23,6 +23,11 @@ const facultyValidationSchema = z.object({
     academicDepartment: z.string(),
 });
 
+const updateFacultyValidationSchema = z.object({
+    body: facultyValidationSchema.deepPartial(),
+});
+
 export const FacultyValidations = {
     facultyValidationSchema,
+    updateFacultyValidationSchema,
 };

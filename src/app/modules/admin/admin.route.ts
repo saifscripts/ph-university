@@ -11,7 +11,7 @@ router
     .route('/:adminId')
     .get(AdminControllers.getSingleAdmin)
     .patch(
-        validateRequest(AdminValidations.adminValidationSchema.deepPartial()),
+        validateRequest(AdminValidations.updateAdminValidationSchema),
         AdminControllers.updateAdmin,
     )
     .delete(AdminControllers.deleteAdmin);
