@@ -1,11 +1,13 @@
 import { ErrorRequestHandler } from 'express';
 import httpStatus from 'http-status';
+import { JsonWebTokenError } from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { ZodError } from 'zod';
 import config from '../config';
 import AppError from '../errors/AppError';
 import handleCastError from '../errors/handleCastError';
 import handleDuplicateError from '../errors/handleDuplicateError';
+import handleJWTError from '../errors/handleJWTError';
 import handleValidationError from '../errors/handleValidationError';
 import handleZodError from '../errors/handleZodError';
 import { IErrorSources } from '../interfaces/errors';
@@ -37,6 +39,11 @@ const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
         errorSources = formattedError.errorSources;
     } else if (err?.code === 11000) {
         const formattedError = handleDuplicateError(err);
+        statusCode = formattedError.statusCode;
+        message = formattedError.message;
+        errorSources = formattedError.errorSources;
+    } else if (err instanceof JsonWebTokenError) {
+        const formattedError = handleJWTError(err);
         statusCode = formattedError.statusCode;
         message = formattedError.message;
         errorSources = formattedError.errorSources;
