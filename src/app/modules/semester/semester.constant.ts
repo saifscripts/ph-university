@@ -23,3 +23,5 @@ export const SemesterNameCodeMapper: ISemesterNameCodeMapper = {
     Summer: '02',
     Fall: '03',
 };
+
+export const SemesterSearchableFields = ['name'];

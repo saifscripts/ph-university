@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+import QueryBuilder from '../../builders/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { SemesterNameCodeMapper } from './semester.constant';
 import { ISemester } from './semester.interface';
@@ -16,8 +17,16 @@ const createSemesterIntoDB = async (payload: ISemester) => {
     return newSemester;
 };
 
-const getAllSemestersFromDB = async () => {
-    const semesters = await Semester.find();
+const getAllSemestersFromDB = async (query: Record<string, unknown>) => {
+    const semesterQuery = new QueryBuilder(Semester.find(), query)
+        // .search(SemesterSearchableFields)
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+
+    const semesters = await semesterQuery.modelQuery;
+
     return semesters;
 };
 

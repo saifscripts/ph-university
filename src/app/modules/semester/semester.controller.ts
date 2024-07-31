@@ -1,5 +1,4 @@
 import httpStatus from 'http-status';
-import AppError from '../../errors/AppError';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { SemesterServices } from './semester.service';
@@ -14,12 +13,8 @@ const createSemester = catchAsync(async (req, res) => {
     });
 });
 
-const getAllSemesters = catchAsync(async (_req, res) => {
-    const semesters = await SemesterServices.getAllSemestersFromDB();
-
-    if (!semesters.length) {
-        throw new AppError(httpStatus.NOT_FOUND, 'No semester found!');
-    }
+const getAllSemesters = catchAsync(async (req, res) => {
+    const semesters = await SemesterServices.getAllSemestersFromDB(req.query);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
