@@ -9,7 +9,7 @@ router
     .route('/create-semester-registration')
     .post(
         validateRequest(
-            SemesterRegistrationValidations.semesterRegistrationValidationSchema,
+            SemesterRegistrationValidations.createSemesterRegistrationValidationSchema,
         ),
         SemesterRegistrationControllers.createSemesterRegistration,
     );
@@ -23,7 +23,7 @@ router
     .get(SemesterRegistrationControllers.getSingleSemesterRegistration)
     .patch(
         validateRequest(
-            SemesterRegistrationValidations.semesterRegistrationValidationSchema.partial(),
+            SemesterRegistrationValidations.updateSemesterRegistrationValidationSchema,
         ),
         SemesterRegistrationControllers.updateSemesterRegistration,
     );
