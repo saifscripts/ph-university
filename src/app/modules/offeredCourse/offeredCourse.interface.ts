@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import { Days } from './offeredCourse.constant';
 
+type IDay = (typeof Days)[number];
+
 export interface IOfferedCourse {
     semesterRegistration: mongoose.Types.ObjectId;
     semester: mongoose.Types.ObjectId;
@@ -10,7 +12,7 @@ export interface IOfferedCourse {
     faculty: mongoose.Types.ObjectId;
     maxCapacity: number;
     section: number;
-    days: (typeof Days)[number];
+    days: IDay[];
     startTime: string;
     endTime: string;
 }
