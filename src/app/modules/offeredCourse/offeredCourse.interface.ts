@@ -16,3 +16,8 @@ export interface IOfferedCourse {
     startTime: string;
     endTime: string;
 }
+
+export interface ISchedule {
+    startTime: string;
+    endTime: string;
+}
