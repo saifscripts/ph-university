@@ -9,7 +9,7 @@ router
     .route('/create-semester-registration')
     .post(
         validateRequest(
-            SemesterRegistrationValidations.semesterRegistrationValidationSchema,
+            SemesterRegistrationValidations.createSemesterRegistrationValidationSchema,
         ),
         SemesterRegistrationControllers.createSemesterRegistration,
     );
@@ -23,9 +23,10 @@ router
     .get(SemesterRegistrationControllers.getSingleSemesterRegistration)
     .patch(
         validateRequest(
-            SemesterRegistrationValidations.semesterRegistrationValidationSchema.deepPartial(),
+            SemesterRegistrationValidations.updateSemesterRegistrationValidationSchema,
         ),
         SemesterRegistrationControllers.updateSemesterRegistration,
-    );
+    )
+    .delete(SemesterRegistrationControllers.deleteSemesterRegistration);
 
 export const SemesterRegistrationRoutes = router;

@@ -1,6 +1,8 @@
 import httpStatus from 'http-status';
+import mongoose from 'mongoose';
 import QueryBuilder from '../../builders/QueryBuilder';
 import AppError from '../../errors/AppError';
+import { OfferedCourse } from '../offeredCourse/offeredCourse.model';
 import { Semester } from '../semester/semester.model';
 import { RegistrationStatus } from './semesterRegistration.constant';
 import { ISemesterRegistration } from './semesterRegistration.interface';
@@ -33,13 +35,15 @@ const createSemesterRegistrationIntoDB = async (
     // check if there is any UPCOMING or ONGOING semester
     const isThereAnyUpcomingOrOngoingSemester =
         await SemesterRegistration.findOne({
-            status: { $in: ['UPCOMING', 'ONGOING'] },
+            status: {
+                $in: [RegistrationStatus.UPCOMING, RegistrationStatus.ONGOING],
+            },
         });
 
     if (isThereAnyUpcomingOrOngoingSemester) {
         throw new AppError(
             httpStatus.BAD_REQUEST,
-            `There is already an ${isThereAnyUpcomingOrOngoingSemester.status} semester`,
+            `There is already an ${isThereAnyUpcomingOrOngoingSemester.status} semester exists`,
         );
     }
 
@@ -140,28 +144,57 @@ const updateSemesterRegistrationIntoDB = async (
     return results;
 };
 
-// const deleteSemesterRegistrationFromDB = async (id: string) => {
-//     const deletedSemesterRegistration =
-//         await SemesterRegistration.findByIdAndUpdate(
-//             id,
-//             { isDeleted: true },
-//             { new: true },
-//         );
+const deleteSemesterRegistrationFromDB = async (id: string) => {
+    const isSemesterRegistrationExists =
+        await SemesterRegistration.findById(id);
 
-//     if (!deletedSemesterRegistration) {
-//         throw new AppError(
-//             httpStatus.BAD_REQUEST,
-//             'Failed to delete SemesterRegistration!',
-//         );
-//     }
+    if (!isSemesterRegistrationExists) {
+        throw new AppError(
+            httpStatus.NOT_FOUND,
+            "Semester registration doesn't exists!",
+        );
+    }
 
-//     return deletedSemesterRegistration;
-// };
+    const semesterRegistrationStatus = isSemesterRegistrationExists.status;
+
+    if (semesterRegistrationStatus !== RegistrationStatus.UPCOMING) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `Can't delete an ${semesterRegistrationStatus} registered semester!`,
+        );
+    }
+
+    const session = await mongoose.startSession();
+
+    try {
+        session.startTransaction();
+        // delete all offered courses for this semester registration
+        await OfferedCourse.deleteMany(
+            {
+                semesterRegistration: id,
+            },
+            { session },
+        );
+
+        // delete the semester registration
+        const deletedSemesterRegistration =
+            await SemesterRegistration.findByIdAndDelete(id, { session });
+
+        await session.commitTransaction();
+        await session.endSession();
+
+        return deletedSemesterRegistration;
+    } catch (error) {
+        await session.abortTransaction();
+        await session.endSession();
+        throw error;
+    }
+};
 
 export const SemesterRegistrationServices = {
     createSemesterRegistrationIntoDB,
     getAllSemesterRegistrationsFromDB,
     getSingleSemesterRegistrationFromDB,
     updateSemesterRegistrationIntoDB,
-    // deleteSemesterRegistrationFromDB,
+    deleteSemesterRegistrationFromDB,
 };
