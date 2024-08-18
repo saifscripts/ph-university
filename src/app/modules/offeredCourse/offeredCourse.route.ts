@@ -14,4 +14,13 @@ router
         OfferedCourseControllers.createOfferedCourse,
     );
 
+router
+    .route('/:id')
+    .patch(
+        validateRequest(
+            OfferedCourseValidations.updateOfferedCourseValidationSchema,
+        ),
+        OfferedCourseControllers.updateOfferedCourse,
+    );
+
 export const OfferedCourseRoutes = router;
