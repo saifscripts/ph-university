@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+import QueryBuilder from '../../builders/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { AcademicDepartment } from '../academicDepartment/academicDepartment.model';
 import { AcademicFaculty } from '../academicFaculty/academicFaculty.model';
@@ -120,6 +121,32 @@ const createOfferedCourseIntoDB = async (payload: IOfferedCourse) => {
     return result;
 };
 
+const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
+    const OfferedCourseQuery = new QueryBuilder(OfferedCourse.find(), query)
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+
+    const offeredCourses = await OfferedCourseQuery.modelQuery;
+
+    if (!offeredCourses.length) {
+        throw new AppError(httpStatus.NOT_FOUND, 'No offered course found!');
+    }
+
+    return offeredCourses;
+};
+
+const getSingleOfferedCourseFromDB = async (id: string) => {
+    const offeredCourse = await OfferedCourse.findById(id);
+
+    if (!offeredCourse) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Offered course not found!');
+    }
+
+    return offeredCourse;
+};
+
 const updateOfferedCourseIntoDB = async (
     id: string,
     payload: Pick<
@@ -186,7 +213,37 @@ const updateOfferedCourseIntoDB = async (
     return result;
 };
 
+const deleteOfferedCourseFromDB = async (id: string) => {
+    const isOfferedCourseExists = await OfferedCourse.findById(id);
+
+    if (!isOfferedCourseExists) {
+        throw new AppError(
+            httpStatus.NOT_FOUND,
+            "Offered course doesn't exist!",
+        );
+    }
+
+    const semesterRegistration = isOfferedCourseExists.semesterRegistration;
+
+    const semesterRegistrationStatus = (
+        await SemesterRegistration.findById(semesterRegistration)
+    )?.status;
+
+    if (semesterRegistrationStatus !== RegistrationStatus.UPCOMING) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `You can't delete an offered course of an ${semesterRegistrationStatus} registered semester!`,
+        );
+    }
+
+    const result = await OfferedCourse.findByIdAndDelete(id);
+    return result;
+};
+
 export const OfferedCourseServices = {
     createOfferedCourseIntoDB,
+    getAllOfferedCoursesFromDB,
+    getSingleOfferedCourseFromDB,
     updateOfferedCourseIntoDB,
+    deleteOfferedCourseFromDB,
 };
